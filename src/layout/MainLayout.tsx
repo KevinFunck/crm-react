@@ -8,8 +8,8 @@ export default function MainLayout() {
 
   const navItems: NavItem[] = [
     { name: "Dashboard", path: "/" },
-    { name: "Kunden", path: "/customers" },
-    { name: "Einstellungen", path: "/settings" },
+    { name: "Customers", path: "/customers" },
+    { name: "Settings", path: "/settings" },
   ];
 
   return (
