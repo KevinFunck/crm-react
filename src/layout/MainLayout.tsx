@@ -10,6 +10,8 @@ export default function MainLayout() {
     { name: "Dashboard", path: "/" },
     { name: "Customers", path: "/customers" },
     { name: "Settings", path: "/settings" },
+    { name: "Calendar", path: "/calendar" },
+    
   ];
 
   return (
