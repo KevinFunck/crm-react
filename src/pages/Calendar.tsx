@@ -1,91 +1,183 @@
 import { useState } from "react";
 import FullCalendar from "@fullcalendar/react";
-import { DateSelectArg, EventInput } from "@fullcalendar/core";
+import { DateSelectArg, EventClickArg, EventInput } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
 
+interface CustomEvent extends EventInput {
+  description?: string;
+}
 
 export default function CalendarPage() {
-  const [events, setEvents] = useState<EventInput[]>([]);
-  const [newEventTitle, setNewEventTitle] = useState("");
+  const [events, setEvents] = useState<CustomEvent[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [currentEventId, setCurrentEventId] = useState<string | null>(null);
 
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [start, setStart] = useState("");
+  const [end, setEnd] = useState("");
+
+  // Format date for datetime-local input
+  const formatForInput = (date: Date) =>
+    new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+      .toISOString()
+      .slice(0, 16);
+
+  // Open modal when selecting a slot
   const handleDateSelect = (selectInfo: DateSelectArg) => {
-    const title = newEventTitle.trim();
-    const calendarApi = selectInfo.view.calendar;
-    calendarApi.unselect();
+    const defaultStart = selectInfo.start;
+    const defaultEnd = selectInfo.end || new Date(defaultStart.getTime() + 60 * 60 * 1000);
 
-    if (title) {
-      const newEvent = {
-        id: String(events.length + 1),
-        title,
-        start: selectInfo.start,
-        end: selectInfo.end,
-        allDay: selectInfo.allDay,
-      };
+    // Open modal, but do NOT add event yet
+    setTitle("");
+    setDescription("");
+    setStart(formatForInput(defaultStart));
+    setEnd(formatForInput(defaultEnd));
+    setIsEditing(false);
+    setCurrentEventId(null);
+    setIsModalOpen(true);
+  };
 
-      calendarApi.addEvent(newEvent);
-      setEvents([...events, newEvent]);
-      setNewEventTitle("");
+  // Open modal for editing existing event
+  const handleEventClick = (clickInfo: EventClickArg) => {
+    const event = clickInfo.event;
+    setCurrentEventId(event.id);
+    setTitle(event.title);
+    setDescription(event.extendedProps.description || "");
+    setStart(formatForInput(event.start!));
+    setEnd(formatForInput(event.end!));
+    setIsEditing(true);
+    setIsModalOpen(true);
+  };
+
+  // Save event (create or update)
+  const handleSave = () => {
+    if (!title.trim()) return;
+    if (new Date(start) >= new Date(end)) {
+      alert("End time must be after start time.");
+      return;
     }
+
+    const newEvent: CustomEvent = {
+      id: currentEventId || String(Date.now()),
+      title,
+      description,
+      start: new Date(start),
+      end: new Date(end),
+      allDay: false,
+    };
+
+    if (isEditing && currentEventId) {
+      setEvents((prev) => prev.map((e) => (e.id === currentEventId ? newEvent : e)));
+    } else {
+      setEvents((prev) => [...prev, newEvent]);
+    }
+
+    closeModal();
+  };
+
+  // Delete event
+  const handleDelete = () => {
+    if (!currentEventId) return;
+    setEvents((prev) => prev.filter((e) => e.id !== currentEventId));
+    closeModal();
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setCurrentEventId(null);
   };
 
   return (
     <div className="min-h-screen bg-gray-950 text-white p-6">
       <div className="max-w-7xl mx-auto space-y-6">
+        <h1 className="text-3xl font-bold">Calendar</h1>
 
-        {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold">Calendar</h1>
-          <p className="text-gray-400 text-sm">
-            Manage your appointments and meetings
-          </p>
-        </div>
-
-        {/* Add Event Card */}
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 shadow-lg">
-          <div className="flex flex-col md:flex-row gap-4">
-            <input
-              type="text"
-              placeholder="Enter event title..."
-              value={newEventTitle}
-              onChange={(e) => setNewEventTitle(e.target.value)}
-              className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-500"
-            />
-            <div className="text-gray-400 text-sm flex items-center">
-              Select a date on the calendar to create the event
-            </div>
-          </div>
-        </div>
-
-        {/* Calendar Card */}
         <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-lg">
           <FullCalendar
-            plugins={[
-              dayGridPlugin,
-              timeGridPlugin,
-              interactionPlugin,
-              listPlugin,
-            ]}
+            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
             headerToolbar={{
               left: "prev,next today",
               center: "title",
               right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek",
             }}
-            initialView="dayGridMonth"
-            selectable={true}
-            editable={true}
-            selectMirror={true}
-            dayMaxEvents={true}
+            initialView="timeGridWeek"
+            selectable
+            editable
             events={events}
             select={handleDateSelect}
+            eventClick={handleEventClick}
+            slotMinTime="06:00:00"
+            slotMaxTime="22:00:00"
+            slotDuration="00:30:00"
             height="auto"
-            eventColor="#3b82f6"
-            eventTextColor="#ffffff"
           />
         </div>
       </div>
+
+      {/* Modal for creating/editing events */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-gray-900 p-6 rounded-2xl w-full max-w-md space-y-4 border border-gray-800">
+            <h2 className="text-xl font-semibold">{isEditing ? "Edit Event" : "Create Event"}</h2>
+
+            <input
+              type="text"
+              placeholder="Title"
+              className="w-full bg-gray-800 border border-gray-700 rounded px-4 py-2"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+
+            <textarea
+              placeholder="Description"
+              className="w-full bg-gray-800 border border-gray-700 rounded px-4 py-2"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+
+            <div>
+              <label className="text-sm text-gray-400">Start</label>
+              <input
+                type="datetime-local"
+                className="w-full bg-gray-800 border border-gray-700 rounded px-4 py-2"
+                value={start}
+                onChange={(e) => setStart(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label className="text-sm text-gray-400">End</label>
+              <input
+                type="datetime-local"
+                className="w-full bg-gray-800 border border-gray-700 rounded px-4 py-2"
+                value={end}
+                onChange={(e) => setEnd(e.target.value)}
+              />
+            </div>
+
+            <div className="flex justify-between pt-4">
+              {isEditing && (
+                <button onClick={handleDelete} className="px-4 py-2 bg-red-600 rounded">
+                  Delete
+                </button>
+              )}
+              <div className="flex gap-3 ml-auto">
+                <button onClick={closeModal} className="px-4 py-2 bg-gray-700 rounded">
+                  Cancel
+                </button>
+                <button onClick={handleSave} className="px-4 py-2 bg-blue-600 rounded">
+                  Save
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
