@@ -1,3 +1,48 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* === FullCalendar Dark Mode Styling === */
+
+/* Month & Year title (top center) */
+.fc .fc-toolbar-title {
+  color: white !important;
+}
+
+/* Day numbers inside calendar grid */
+.fc .fc-daygrid-day-number {
+  color: white !important;
+}
+
+/* Time labels on the left (e.g., 08:00, 09:00) */
+.fc .fc-timegrid-slot-label-cushion {
+  color: white !important;
+}
+
+/* Weekday names (Mon, Tue, Wed...) → BLACK */
+.fc .fc-col-header-cell-cushion {
+  color: black !important;
+  font-weight: 600;
+}
+
+/* Toolbar buttons (Today, Next, Prev) */
+.fc .fc-button {
+  background-color: #1f2937 !important;
+  border: 1px solid #374151 !important;
+  color: white !important;
+}
+
+.fc .fc-button:hover {
+  background-color: #374151 !important;
+}
+
+/* Optional: Dark background for the calendar */
+.fc {
+  background-color: #111827;
+}
+
+/* Darker grid borders */
+.fc-theme-standard td,
+.fc-theme-standard th {
+  border-color: #374151;
+}

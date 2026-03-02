@@ -21,18 +21,16 @@ export default function CalendarPage() {
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
 
-  // Format date for datetime-local input
   const formatForInput = (date: Date) =>
     new Date(date.getTime() - date.getTimezoneOffset() * 60000)
       .toISOString()
       .slice(0, 16);
 
-  // Open modal when selecting a slot
   const handleDateSelect = (selectInfo: DateSelectArg) => {
     const defaultStart = selectInfo.start;
-    const defaultEnd = selectInfo.end || new Date(defaultStart.getTime() + 60 * 60 * 1000);
+    const defaultEnd =
+      selectInfo.end || new Date(defaultStart.getTime() + 60 * 60 * 1000);
 
-    // Open modal, but do NOT add event yet
     setTitle("");
     setDescription("");
     setStart(formatForInput(defaultStart));
@@ -42,9 +40,9 @@ export default function CalendarPage() {
     setIsModalOpen(true);
   };
 
-  // Open modal for editing existing event
   const handleEventClick = (clickInfo: EventClickArg) => {
     const event = clickInfo.event;
+
     setCurrentEventId(event.id);
     setTitle(event.title);
     setDescription(event.extendedProps.description || "");
@@ -54,9 +52,9 @@ export default function CalendarPage() {
     setIsModalOpen(true);
   };
 
-  // Save event (create or update)
   const handleSave = () => {
     if (!title.trim()) return;
+
     if (new Date(start) >= new Date(end)) {
       alert("End time must be after start time.");
       return;
@@ -72,7 +70,9 @@ export default function CalendarPage() {
     };
 
     if (isEditing && currentEventId) {
-      setEvents((prev) => prev.map((e) => (e.id === currentEventId ? newEvent : e)));
+      setEvents((prev) =>
+        prev.map((e) => (e.id === currentEventId ? newEvent : e))
+      );
     } else {
       setEvents((prev) => [...prev, newEvent]);
     }
@@ -80,10 +80,13 @@ export default function CalendarPage() {
     closeModal();
   };
 
-  // Delete event
   const handleDelete = () => {
     if (!currentEventId) return;
-    setEvents((prev) => prev.filter((e) => e.id !== currentEventId));
+
+    setEvents((prev) =>
+      prev.filter((e) => e.id !== currentEventId)
+    );
+
     closeModal();
   };
 
@@ -93,13 +96,20 @@ export default function CalendarPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-        <h1 className="text-3xl font-bold">Calendar</h1>
+    <>
+      <div className="min-h-screen bg-white p-6">
+        <div className="flex justify-between items-center bg-gray-800 text-white rounded-lg px-6 py-4 shadow mb-6">
+          <h2 className="text-2xl font-semibold">Calendar</h2>
+        </div>
 
         <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-lg">
           <FullCalendar
-            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
+            plugins={[
+              dayGridPlugin,
+              timeGridPlugin,
+              interactionPlugin,
+              listPlugin,
+            ]}
             headerToolbar={{
               left: "prev,next today",
               center: "title",
@@ -119,11 +129,13 @@ export default function CalendarPage() {
         </div>
       </div>
 
-      {/* Modal for creating/editing events */}
+      {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="bg-gray-900 p-6 rounded-2xl w-full max-w-md space-y-4 border border-gray-800">
-            <h2 className="text-xl font-semibold">{isEditing ? "Edit Event" : "Create Event"}</h2>
+          <div className="bg-gray-900 p-6 rounded-2xl w-full max-w-md space-y-4 border border-gray-800 text-white">
+            <h2 className="text-xl font-semibold">
+              {isEditing ? "Edit Event" : "Create Event"}
+            </h2>
 
             <input
               type="text"
@@ -162,15 +174,26 @@ export default function CalendarPage() {
 
             <div className="flex justify-between pt-4">
               {isEditing && (
-                <button onClick={handleDelete} className="px-4 py-2 bg-red-600 rounded">
+                <button
+                  onClick={handleDelete}
+                  className="px-4 py-2 bg-red-600 rounded"
+                >
                   Delete
                 </button>
               )}
+
               <div className="flex gap-3 ml-auto">
-                <button onClick={closeModal} className="px-4 py-2 bg-gray-700 rounded">
+                <button
+                  onClick={closeModal}
+                  className="px-4 py-2 bg-gray-700 rounded"
+                >
                   Cancel
                 </button>
-                <button onClick={handleSave} className="px-4 py-2 bg-blue-600 rounded">
+
+                <button
+                  onClick={handleSave}
+                  className="px-4 py-2 bg-blue-600 rounded"
+                >
                   Save
                 </button>
               </div>
@@ -178,6 +201,6 @@ export default function CalendarPage() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
