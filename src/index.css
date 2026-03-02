@@ -46,3 +46,27 @@
 .fc-theme-standard th {
   border-color: #374151;
 }
+/* === Improve Event Visibility in Dark Mode === */
+
+/* Event container */
+.fc .fc-event {
+  background-color: #2563eb !important; /* blue-600 */
+  border: none !important;
+  color: white !important;
+}
+
+/* Event title text */
+.fc .fc-event-title {
+  color: white !important;
+  font-weight: 500;
+}
+
+/* Time text inside events */
+.fc .fc-event-time {
+  color: white !important;
+}
+
+/* Hover effect */
+.fc .fc-event:hover {
+  background-color: #1d4ed8 !important; /* darker blue */
+}
