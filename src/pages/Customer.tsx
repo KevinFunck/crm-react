@@ -114,7 +114,7 @@ export default function Customers() {
 
     if (editingCustomer) {
       // Edit existing customer
-      setCustomers(customers.map(c => 
+      setCustomers(customers.map(c =>
         c.id === editingCustomer.id ? { ...c, ...formData } : c
       ));
     } else {
@@ -131,14 +131,21 @@ export default function Customers() {
       {/* ---------------------------
           Header section
       --------------------------- */}
-      <div className="flex flex-col md:flex-row md:justify-between items-start md:items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-800 mb-4 md:mb-0">Customers</h1>
-        <button
-          onClick={openAddModal}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
-        >
-          Add Customer
-        </button>
+      <div className="space-y-6">
+        <div className="flex flex-col md:flex-row md:justify-between items-start md:items-center bg-gray-800 text-white rounded-lg px-6 py-4 shadow">
+
+          <h1 className="text-2xl font-semibold mb-4 md:mb-0">
+            Customers
+          </h1>
+
+          <button
+            onClick={openAddModal}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+          >
+            Add Customer
+          </button>
+
+        </div>
       </div>
 
       {/* ---------------------------
@@ -208,10 +215,10 @@ export default function Customers() {
           <Dialog.Title className="text-xl font-bold mb-4">{editingCustomer ? "Edit Customer" : "Add Customer"}</Dialog.Title>
 
           <div className="space-y-4">
-            <input type="text" placeholder="Name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            <input type="email" placeholder="Email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            <input type="text" placeholder="Phone" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} className="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            <input type="text" placeholder="Company" value={formData.company} onChange={e => setFormData({...formData, company: e.target.value})} className="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <input type="text" placeholder="Name" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} className="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <input type="email" placeholder="Email" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} className="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <input type="text" placeholder="Phone" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} className="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <input type="text" placeholder="Company" value={formData.company} onChange={e => setFormData({ ...formData, company: e.target.value })} className="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" />
           </div>
 
           <div className="mt-6 flex justify-end gap-2">
