@@ -153,7 +153,7 @@ export default function CalendarPage() {
 
   return (
     <>
-      <div className="min-h-screen bg-white p-6">
+      <div className="space-y-6">
         {/* Page Header */}
         <div className="flex justify-between items-center bg-gray-800 text-white rounded-lg px-6 py-4 shadow mb-6">
           <h2 className="text-2xl font-semibold">Calendar</h2>

@@ -126,25 +126,22 @@ export default function Customers() {
   };
 
   return (
-    <div className="min-h-screen p-6 bg-gray-100">
+    <div className="space-y-6">
 
       {/* ---------------------------
           Header section
       --------------------------- */}
       <div className="space-y-6">
         <div className="flex flex-col md:flex-row md:justify-between items-start md:items-center bg-gray-800 text-white rounded-lg px-6 py-4 shadow">
-
           <h1 className="text-2xl font-semibold mb-4 md:mb-0">
             Customers
           </h1>
-
           <button
             onClick={openAddModal}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+            className="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition"
           >
             Add Customer
           </button>
-
         </div>
       </div>
 
