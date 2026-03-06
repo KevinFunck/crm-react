@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Dialog } from "@headlessui/react";
 import { useNavigate } from "react-router-dom";
-import { CustomerType } from "../types/Customer";
+import { CustomerType } from "../../types/Customer";
 
 /* ---------------------------
    Component Props

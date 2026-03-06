@@ -3,8 +3,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import MainLayout from "./layout/MainLayout";
 import Dashboard from "./pages/Dashboard";
 import Calendar from "./pages/Calendar";
-import Customer from "./pages/Customer";
-import CustomerDetail from "./pages/CustomerDetail";
+import Customer from "./pages/Customer/Customer";
+import CustomerDetail from "./pages/Customer/CustomerDetail";
 import { CustomerType } from "./types/Customer";
 
 function App() {
