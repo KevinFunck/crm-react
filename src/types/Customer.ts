@@ -6,7 +6,7 @@ export interface ContactPerson {
   name: string;
   email: string;
   phone?: string;
-  notes?: Note[]; // Notes specific to this contact
+  notes: Note[]; // Notes specific to this contact
 }
 
 /* ---------------------------
