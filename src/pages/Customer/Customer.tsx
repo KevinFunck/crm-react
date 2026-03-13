@@ -144,12 +144,12 @@ export default function Customers({ customers, setCustomers }: Props) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-2 md:p-6">
 
       {/* ---------------------------
           Header
       --------------------------- */}
-      <div className="flex justify-between items-center bg-gray-800 text-white rounded-lg px-6 py-4 shadow">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-gray-800 text-white rounded-lg px-4 md:px-6 py-4 shadow gap-3 md:gap-0">
         <h1 className="text-2xl font-semibold">Companies</h1>
 
         <button
@@ -164,41 +164,35 @@ export default function Customers({ customers, setCustomers }: Props) {
           Companies Table
       --------------------------- */}
       <div className="overflow-x-auto bg-white shadow-lg rounded-xl">
-        <table className="min-w-full divide-y divide-gray-200">
+        <table className="min-w-full divide-y divide-gray-200 table-auto md:table-fixed">
 
           <thead className="bg-gray-900 text-white">
             <tr>
-              <th className="px-6 py-3 text-left text-sm font-medium">Company</th>
-              <th className="px-6 py-3 text-left text-sm font-medium">Email</th>
-              <th className="px-6 py-3 text-left text-sm font-medium">Phone</th>
-              <th className="px-6 py-3 text-left text-sm font-medium">Contacts</th>
-              <th className="px-6 py-3 text-right text-sm font-medium">Actions</th>
+              <th className="px-3 md:px-6 py-2 text-left text-sm font-medium">Company</th>
+              <th className="px-3 md:px-6 py-2 text-left text-sm font-medium hidden sm:table-cell">Email</th>
+              <th className="px-3 md:px-6 py-2 text-left text-sm font-medium hidden md:table-cell">Phone</th>
+              <th className="px-3 md:px-6 py-2 text-left text-sm font-medium hidden lg:table-cell">Contacts</th>
+              <th className="px-3 md:px-6 py-2 text-right text-sm font-medium">Actions</th>
             </tr>
           </thead>
 
           {/* ---------------------------
               Alphabetical grouped rows
-              Shows a letter divider when the first
-              character of companyName changes
           --------------------------- */}
           <tbody className="divide-y divide-gray-200">
             {currentCustomers.map((customer, index) => {
               const firstLetter = customer.companyName.charAt(0).toUpperCase();
-
               const prevLetter =
                 index > 0
-                  ? currentCustomers[index - 1].companyName
-                      .charAt(0)
-                      .toUpperCase()
+                  ? currentCustomers[index - 1].companyName.charAt(0).toUpperCase()
                   : null;
-
               const showLetter = firstLetter !== prevLetter;
 
               return (
                 <>
                   {showLetter && (
                     <tr>
-                      <td colSpan={5} className="bg-gray-50 px-6 py-3">
+                      <td colSpan={5} className="bg-gray-50 px-3 md:px-6 py-2">
                         <div className="flex items-center gap-4">
                           <span className="text-lg font-semibold text-gray-700">
                             {firstLetter}
@@ -214,21 +208,21 @@ export default function Customers({ customers, setCustomers }: Props) {
                     className="hover:bg-gray-50 cursor-pointer transition"
                     onClick={() => navigate(`/customers/${customer.id}`)}
                   >
-                    <td className="px-6 py-4 font-medium text-gray-900">
+                    <td className="px-3 md:px-6 py-2 font-medium text-gray-900">
                       {customer.companyName}
                     </td>
-                    <td className="px-6 py-4 text-gray-600">
+                    <td className="px-3 md:px-6 py-2 text-gray-600 hidden sm:table-cell">
                       {customer.companyEmail}
                     </td>
-                    <td className="px-6 py-4 text-gray-600">
+                    <td className="px-3 md:px-6 py-2 text-gray-600 hidden md:table-cell">
                       {customer.companyPhone}
                     </td>
-                    <td className="px-6 py-4 text-gray-600">
+                    <td className="px-3 md:px-6 py-2 text-gray-600 hidden lg:table-cell">
                       {customer.contacts.length}
                     </td>
 
                     <td
-                      className="px-6 py-4 text-right space-x-2"
+                      className="px-3 md:px-6 py-2 text-right space-x-2"
                       onClick={e => e.stopPropagation()}
                     >
                       <button
@@ -258,7 +252,7 @@ export default function Customers({ customers, setCustomers }: Props) {
           Pagination
       --------------------------- */}
       {totalPages > 1 && (
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-2">
           <button
             disabled={currentPage === 1}
             onClick={() => setCurrentPage(prev => prev - 1)}
@@ -289,17 +283,14 @@ export default function Customers({ customers, setCustomers }: Props) {
         onClose={() => setIsModalOpen(false)}
         className="fixed inset-0 z-50 flex items-center justify-center"
       >
-
         <div className="fixed inset-0 bg-black/50" aria-hidden="true" />
 
         <Dialog.Panel className="relative bg-gray-900 p-6 rounded-2xl shadow-lg max-w-md w-full text-white">
-
           <Dialog.Title className="text-xl font-bold mb-4">
             {editingCustomer ? "Edit Company" : "Add Company"}
           </Dialog.Title>
 
           <div className="space-y-4">
-
             <input
               type="text"
               placeholder="Company Name"
@@ -309,7 +300,6 @@ export default function Customers({ customers, setCustomers }: Props) {
               }
               className="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700"
             />
-
             <input
               type="email"
               placeholder="Company Email"
@@ -319,7 +309,6 @@ export default function Customers({ customers, setCustomers }: Props) {
               }
               className="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700"
             />
-
             <input
               type="text"
               placeholder="Company Phone"
@@ -329,27 +318,22 @@ export default function Customers({ customers, setCustomers }: Props) {
               }
               className="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700"
             />
-
           </div>
 
           <div className="mt-6 flex justify-end gap-2">
-
             <button
               onClick={() => setIsModalOpen(false)}
               className="px-4 py-2 bg-gray-700 rounded-lg"
             >
               Cancel
             </button>
-
             <button
               onClick={handleSubmit}
               className="px-4 py-2 bg-blue-600 rounded-lg hover:bg-blue-700"
             >
               Save
             </button>
-
           </div>
-
         </Dialog.Panel>
       </Dialog>
 
@@ -361,44 +345,34 @@ export default function Customers({ customers, setCustomers }: Props) {
         onClose={() => setIsDeleteModalOpen(false)}
         className="fixed inset-0 z-50 flex items-center justify-center"
       >
-
         <div className="fixed inset-0 bg-black/50" aria-hidden="true" />
 
         <Dialog.Panel className="relative bg-gray-900 p-6 rounded-2xl shadow-lg max-w-sm w-full text-white">
-
           <Dialog.Title className="text-xl font-bold mb-4">
             Delete Company?
           </Dialog.Title>
 
           <p className="mb-6">
             Are you sure you want to delete{" "}
-            <span className="font-semibold">
-              {customerToDelete?.companyName}
-            </span>
-            ?
+            <span className="font-semibold">{customerToDelete?.companyName}</span>?
           </p>
 
           <div className="flex justify-end gap-2">
-
             <button
               onClick={() => setIsDeleteModalOpen(false)}
               className="px-4 py-2 bg-gray-700 rounded-lg"
             >
               Cancel
             </button>
-
             <button
               onClick={handleDelete}
               className="px-4 py-2 bg-red-600 rounded-lg hover:bg-red-700"
             >
               Delete
             </button>
-
           </div>
-
         </Dialog.Panel>
       </Dialog>
-
     </div>
   );
 }
