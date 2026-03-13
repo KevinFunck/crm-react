@@ -42,11 +42,24 @@ export default function Customers({ customers, setCustomers }: Props) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const totalPages = Math.ceil(customers.length / itemsPerPage);
+  /* ---------------------------
+     Sort customers alphabetically
+     (A → Z based on companyName)
+     Copy array first to avoid mutating state
+  --------------------------- */
+  const sortedCustomers = [...customers].sort((a, b) =>
+    a.companyName.localeCompare(b.companyName)
+  );
+
+  /* ---------------------------
+     Pagination calculation
+     Uses sortedCustomers instead of customers
+  --------------------------- */
+  const totalPages = Math.ceil(sortedCustomers.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
 
-  const currentCustomers = customers.slice(indexOfFirstItem, indexOfLastItem);
+  const currentCustomers = sortedCustomers.slice(indexOfFirstItem, indexOfLastItem);
 
   /* ---------------------------
      Open modal for adding new company
