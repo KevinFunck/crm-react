@@ -176,38 +176,79 @@ export default function Customers({ customers, setCustomers }: Props) {
             </tr>
           </thead>
 
+          {/* ---------------------------
+              Alphabetical grouped rows
+              Shows a letter divider when the first
+              character of companyName changes
+          --------------------------- */}
           <tbody className="divide-y divide-gray-200">
-            {currentCustomers.map(customer => (
-              <tr
-                key={customer.id}
-                className="hover:bg-gray-50 cursor-pointer"
-                onClick={() => navigate(`/customers/${customer.id}`)}
-              >
-                <td className="px-6 py-4">{customer.companyName}</td>
-                <td className="px-6 py-4">{customer.companyEmail}</td>
-                <td className="px-6 py-4">{customer.companyPhone}</td>
-                <td className="px-6 py-4">{customer.contacts.length}</td>
+            {currentCustomers.map((customer, index) => {
+              const firstLetter = customer.companyName.charAt(0).toUpperCase();
 
-                <td
-                  className="px-6 py-4 text-right space-x-2"
-                  onClick={e => e.stopPropagation()}
-                >
-                  <button
-                    onClick={() => openEditModal(customer)}
-                    className="text-blue-600 hover:underline"
-                  >
-                    Edit
-                  </button>
+              const prevLetter =
+                index > 0
+                  ? currentCustomers[index - 1].companyName
+                      .charAt(0)
+                      .toUpperCase()
+                  : null;
 
-                  <button
-                    onClick={() => openDeleteModal(customer)}
-                    className="text-red-600 hover:underline"
+              const showLetter = firstLetter !== prevLetter;
+
+              return (
+                <>
+                  {showLetter && (
+                    <tr>
+                      <td colSpan={5} className="bg-gray-50 px-6 py-3">
+                        <div className="flex items-center gap-4">
+                          <span className="text-lg font-semibold text-gray-700">
+                            {firstLetter}
+                          </span>
+                          <div className="flex-1 h-px bg-gray-200"></div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+
+                  <tr
+                    key={customer.id}
+                    className="hover:bg-gray-50 cursor-pointer transition"
+                    onClick={() => navigate(`/customers/${customer.id}`)}
                   >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
+                    <td className="px-6 py-4 font-medium text-gray-900">
+                      {customer.companyName}
+                    </td>
+                    <td className="px-6 py-4 text-gray-600">
+                      {customer.companyEmail}
+                    </td>
+                    <td className="px-6 py-4 text-gray-600">
+                      {customer.companyPhone}
+                    </td>
+                    <td className="px-6 py-4 text-gray-600">
+                      {customer.contacts.length}
+                    </td>
+
+                    <td
+                      className="px-6 py-4 text-right space-x-2"
+                      onClick={e => e.stopPropagation()}
+                    >
+                      <button
+                        onClick={() => openEditModal(customer)}
+                        className="text-blue-600 hover:underline"
+                      >
+                        Edit
+                      </button>
+
+                      <button
+                        onClick={() => openDeleteModal(customer)}
+                        className="text-red-600 hover:underline"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                </>
+              );
+            })}
           </tbody>
 
         </table>
