@@ -1,7 +1,13 @@
-import { useState } from "react";
+import axios from "axios";
 import { Dialog } from "@headlessui/react";
 import { useNavigate } from "react-router-dom";
 import { CustomerType } from "../../types/Customer";
+import React, { useState, useEffect } from "react";
+
+/* ---------------------------
+   API BASE URL (FIX)
+--------------------------- */
+const API = "http://localhost:5001";
 
 /* ---------------------------
    Component Props
@@ -43,27 +49,36 @@ export default function Customers({ customers, setCustomers }: Props) {
   const itemsPerPage = 10;
 
   /* ---------------------------
-     Sort customers alphabetically
-     (A → Z based on companyName)
-     Copy array first to avoid mutating state
+     Load customers from backend on mount
   --------------------------- */
+  useEffect(() => {
+    fetchCustomers();
+  }, []);
+
+  const fetchCustomers = async () => {
+    try {
+      const res = await axios.get(`${API}/customers`);
+      setCustomers(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  /* ---------------------------
+     Sort customers alphabetically
+--------------------------- */
   const sortedCustomers = [...customers].sort((a, b) =>
     a.companyName.localeCompare(b.companyName)
   );
 
   /* ---------------------------
      Pagination calculation
-     Uses sortedCustomers instead of customers
-  --------------------------- */
+--------------------------- */
   const totalPages = Math.ceil(sortedCustomers.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-
   const currentCustomers = sortedCustomers.slice(indexOfFirstItem, indexOfLastItem);
 
-  /* ---------------------------
-     Open modal for adding new company
-  --------------------------- */
   const openAddModal = () => {
     setEditingCustomer(null);
     setFormData({
@@ -74,81 +89,75 @@ export default function Customers({ customers, setCustomers }: Props) {
     setIsModalOpen(true);
   };
 
-  /* ---------------------------
-     Open modal for editing company
-  --------------------------- */
   const openEditModal = (customer: CustomerType) => {
     setEditingCustomer(customer);
-
     setFormData({
       companyName: customer.companyName,
       companyEmail: customer.companyEmail || "",
       companyPhone: customer.companyPhone || "",
     });
-
     setIsModalOpen(true);
   };
 
-  /* ---------------------------
-     Open delete modal
-  --------------------------- */
   const openDeleteModal = (customer: CustomerType) => {
     setCustomerToDelete(customer);
     setIsDeleteModalOpen(true);
   };
 
-  /* ---------------------------
-     Delete company
-  --------------------------- */
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!customerToDelete) return;
 
-    const updatedCustomers = customers.filter(
-      c => c.id !== customerToDelete.id
-    );
+    try {
+      await axios.delete(`${API}/customers/${customerToDelete.id}`);
 
-    setCustomers(updatedCustomers);
+      const updated = customers.filter(c => c.id !== customerToDelete.id);
+      setCustomers(updated);
 
-    setIsDeleteModalOpen(false);
-    setCustomerToDelete(null);
+      setIsDeleteModalOpen(false);
+      setCustomerToDelete(null);
 
-    if (indexOfFirstItem >= updatedCustomers.length && currentPage > 1) {
-      setCurrentPage(prev => prev - 1);
+      if (indexOfFirstItem >= updated.length && currentPage > 1) {
+        setCurrentPage(prev => prev - 1);
+      }
+    } catch (err) {
+      console.error(err);
     }
   };
 
-  /* ---------------------------
-     Add or update company
-  --------------------------- */
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!formData.companyName) return;
 
-    if (editingCustomer) {
-      setCustomers(
-        customers.map(c =>
-          c.id === editingCustomer.id ? { ...c, ...formData } : c
-        )
-      );
-    } else {
-      const newCompany: CustomerType = {
-        id: Date.now().toString(),
-        ...formData,
-        contacts: [],
-        notes: [],
-      };
+    try {
+      if (editingCustomer) {
+        const res = await axios.put(
+          `${API}/customers/${editingCustomer.id}`,
+          formData
+        );
 
-      setCustomers([...customers, newCompany]);
+        setCustomers(
+          customers.map(c =>
+            c.id === editingCustomer.id ? res.data : c
+          )
+        );
+      } else {
+        const res = await axios.post(
+          `${API}/customers`,
+          formData
+        );
+
+        setCustomers([...customers, res.data]);
+      }
+
+      setIsModalOpen(false);
+    } catch (err) {
+      console.error(err);
     }
-
-    setIsModalOpen(false);
   };
 
   return (
     <div className="space-y-6 p-2 md:p-6">
 
-      {/* ---------------------------
-          Header
-      --------------------------- */}
+      {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-gray-800 text-white rounded-lg px-4 md:px-6 py-4 shadow gap-3 md:gap-0">
         <h1 className="text-2xl font-semibold">Companies</h1>
 
@@ -160,9 +169,7 @@ export default function Customers({ customers, setCustomers }: Props) {
         </button>
       </div>
 
-      {/* ---------------------------
-          Companies Table
-      --------------------------- */}
+      {/* Table */}
       <div className="overflow-x-auto bg-white shadow-lg rounded-xl">
         <table className="min-w-full divide-y divide-gray-200 table-auto md:table-fixed">
 
@@ -176,9 +183,6 @@ export default function Customers({ customers, setCustomers }: Props) {
             </tr>
           </thead>
 
-          {/* ---------------------------
-              Alphabetical grouped rows
-          --------------------------- */}
           <tbody className="divide-y divide-gray-200">
             {currentCustomers.map((customer, index) => {
               const firstLetter = customer.companyName.charAt(0).toUpperCase();
@@ -186,10 +190,12 @@ export default function Customers({ customers, setCustomers }: Props) {
                 index > 0
                   ? currentCustomers[index - 1].companyName.charAt(0).toUpperCase()
                   : null;
+
               const showLetter = firstLetter !== prevLetter;
 
               return (
-                <>
+                <React.Fragment key={customer.id}>
+
                   {showLetter && (
                     <tr>
                       <td colSpan={5} className="bg-gray-50 px-3 md:px-6 py-2">
@@ -204,43 +210,40 @@ export default function Customers({ customers, setCustomers }: Props) {
                   )}
 
                   <tr
-                    key={customer.id}
                     className="hover:bg-gray-50 cursor-pointer transition"
                     onClick={() => navigate(`/customers/${customer.id}`)}
                   >
                     <td className="px-3 md:px-6 py-2 font-medium text-gray-900">
                       {customer.companyName}
                     </td>
+
                     <td className="px-3 md:px-6 py-2 text-gray-600 hidden sm:table-cell">
                       {customer.companyEmail}
                     </td>
+
                     <td className="px-3 md:px-6 py-2 text-gray-600 hidden md:table-cell">
                       {customer.companyPhone}
                     </td>
+
+                    {/* ✅ FIX: safe access */}
                     <td className="px-3 md:px-6 py-2 text-gray-600 hidden lg:table-cell">
-                      {customer.contacts.length}
+                      {customer.contacts?.length ?? 0}
                     </td>
 
                     <td
                       className="px-3 md:px-6 py-2 text-right space-x-2"
-                      onClick={e => e.stopPropagation()}
+                      onClick={(e) => e.stopPropagation()}
                     >
-                      <button
-                        onClick={() => openEditModal(customer)}
-                        className="text-blue-600 hover:underline"
-                      >
+                      <button onClick={() => openEditModal(customer)} className="text-blue-600 hover:underline">
                         Edit
                       </button>
 
-                      <button
-                        onClick={() => openDeleteModal(customer)}
-                        className="text-red-600 hover:underline"
-                      >
+                      <button onClick={() => openDeleteModal(customer)} className="text-red-600 hover:underline">
                         Delete
                       </button>
                     </td>
                   </tr>
-                </>
+                </React.Fragment>
               );
             })}
           </tbody>
@@ -248,9 +251,7 @@ export default function Customers({ customers, setCustomers }: Props) {
         </table>
       </div>
 
-      {/* ---------------------------
-          Pagination
-      --------------------------- */}
+      {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex flex-col sm:flex-row justify-between items-center gap-2">
           <button
@@ -275,16 +276,9 @@ export default function Customers({ customers, setCustomers }: Props) {
         </div>
       )}
 
-      {/* ---------------------------
-          Add / Edit Modal
-      --------------------------- */}
-      <Dialog
-        open={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        className="fixed inset-0 z-50 flex items-center justify-center"
-      >
-        <div className="fixed inset-0 bg-black/50" aria-hidden="true" />
-
+      {/* Add/Edit Modal */}
+      <Dialog open={isModalOpen} onClose={() => setIsModalOpen(false)} className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black/50" />
         <Dialog.Panel className="relative bg-gray-900 p-6 rounded-2xl shadow-lg max-w-md w-full text-white">
           <Dialog.Title className="text-xl font-bold mb-4">
             {editingCustomer ? "Edit Company" : "Add Company"}
@@ -292,65 +286,38 @@ export default function Customers({ customers, setCustomers }: Props) {
 
           <div className="space-y-4">
             <input
-              type="text"
-              placeholder="Company Name"
               value={formData.companyName}
-              onChange={(e) =>
-                setFormData({ ...formData, companyName: e.target.value })
-              }
+              onChange={e => setFormData({ ...formData, companyName: e.target.value })}
               className="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700"
             />
             <input
-              type="email"
-              placeholder="Company Email"
               value={formData.companyEmail}
-              onChange={(e) =>
-                setFormData({ ...formData, companyEmail: e.target.value })
-              }
+              onChange={e => setFormData({ ...formData, companyEmail: e.target.value })}
               className="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700"
             />
             <input
-              type="text"
-              placeholder="Company Phone"
               value={formData.companyPhone}
-              onChange={(e) =>
-                setFormData({ ...formData, companyPhone: e.target.value })
-              }
+              onChange={e => setFormData({ ...formData, companyPhone: e.target.value })}
               className="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700"
             />
           </div>
 
           <div className="mt-6 flex justify-end gap-2">
-            <button
-              onClick={() => setIsModalOpen(false)}
-              className="px-4 py-2 bg-gray-700 rounded-lg"
-            >
+            <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 bg-gray-700 rounded-lg">
               Cancel
             </button>
-            <button
-              onClick={handleSubmit}
-              className="px-4 py-2 bg-blue-600 rounded-lg hover:bg-blue-700"
-            >
+            <button onClick={handleSubmit} className="px-4 py-2 bg-blue-600 rounded-lg">
               Save
             </button>
           </div>
         </Dialog.Panel>
       </Dialog>
 
-      {/* ---------------------------
-          Delete Modal
-      --------------------------- */}
-      <Dialog
-        open={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
-        className="fixed inset-0 z-50 flex items-center justify-center"
-      >
-        <div className="fixed inset-0 bg-black/50" aria-hidden="true" />
-
+      {/* Delete Modal */}
+      <Dialog open={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black/50" />
         <Dialog.Panel className="relative bg-gray-900 p-6 rounded-2xl shadow-lg max-w-sm w-full text-white">
-          <Dialog.Title className="text-xl font-bold mb-4">
-            Delete Company?
-          </Dialog.Title>
+          <Dialog.Title>Delete Company?</Dialog.Title>
 
           <p className="mb-6">
             Are you sure you want to delete{" "}
@@ -358,21 +325,16 @@ export default function Customers({ customers, setCustomers }: Props) {
           </p>
 
           <div className="flex justify-end gap-2">
-            <button
-              onClick={() => setIsDeleteModalOpen(false)}
-              className="px-4 py-2 bg-gray-700 rounded-lg"
-            >
+            <button onClick={() => setIsDeleteModalOpen(false)} className="px-4 py-2 bg-gray-700 rounded-lg">
               Cancel
             </button>
-            <button
-              onClick={handleDelete}
-              className="px-4 py-2 bg-red-600 rounded-lg hover:bg-red-700"
-            >
+            <button onClick={handleDelete} className="px-4 py-2 bg-red-600 rounded-lg">
               Delete
             </button>
           </div>
         </Dialog.Panel>
       </Dialog>
+
     </div>
   );
 }
