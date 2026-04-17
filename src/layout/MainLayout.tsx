@@ -2,8 +2,10 @@ import { useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import type { NavItem } from "../types/Navigation";
+import { useAuth } from "../context/AuthContext";
 
 export default function MainLayout() {
+  const { user, logout } = useAuth();
 
   /* ---------------------------
      Controls whether the mobile sidebar drawer is open
@@ -59,8 +61,16 @@ export default function MainLayout() {
           {/* Dynamic page title */}
           <h1 className="text-lg font-semibold">{pageTitle}</h1>
 
-          {/* User / profile placeholder */}
-          <div className="text-gray-300">User</div>
+          {/* User email + logout */}
+          <div className="flex items-center gap-3">
+            <span className="text-gray-300 text-sm hidden sm:block">{user?.email}</span>
+            <button
+              onClick={logout}
+              className="text-sm text-gray-300 hover:text-white border border-gray-600 rounded px-3 py-1 hover:border-gray-400 transition-colors"
+            >
+              Abmelden
+            </button>
+          </div>
 
         </header>
 

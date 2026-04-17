@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import customerRoutes from "./routes/customers.js";
 import contactRoutes from "./routes/contacts.js";
 import noteRoutes from "./routes/notes.js";
+import authRoutes from "./routes/auth.js";
 
 dotenv.config();
 
@@ -15,6 +16,7 @@ app.use(express.json());
 /* ---------------------------
    Routes
 --------------------------- */
+app.use("/auth", authRoutes);
 app.use("/customers", customerRoutes);
 app.use("/contacts", contactRoutes);
 app.use("/notes", noteRoutes);

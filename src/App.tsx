@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 import MainLayout from "./layout/MainLayout";
+import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Calendar from "./pages/Calendar";
 import Customer from "./pages/Customer/Customer";
@@ -9,41 +12,40 @@ import Settings from "./pages/Settings";
 import { CustomerType } from "./types/Customer";
 
 function App() {
-
-  /* ---------------------------
-     Central customer state
-     Starts empty — Customer.tsx fetches data from the backend on mount
-  --------------------------- */
   const [customers, setCustomers] = useState<CustomerType[]>([]);
 
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<MainLayout />}>
+      <AuthProvider>
+        <Routes>
 
-          {/* Dashboard — overview and stats */}
-          <Route index element={<Dashboard />} />
+          {/* Public login route */}
+          <Route path="/login" element={<Login />} />
 
-          {/* Calendar — event management */}
-          <Route path="calendar" element={<Calendar />} />
-
-          {/* Customer list — pass state and setter as props */}
+          {/* Protected app routes */}
           <Route
-            path="customers"
-            element={<Customer customers={customers} setCustomers={setCustomers} />}
-          />
+            path="/"
+            element={
+              <ProtectedRoute>
+                <MainLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<Dashboard />} />
+            <Route path="calendar" element={<Calendar />} />
+            <Route
+              path="customers"
+              element={<Customer customers={customers} setCustomers={setCustomers} />}
+            />
+            <Route
+              path="customers/:id"
+              element={<CustomerDetail customers={customers} setCustomers={setCustomers} />}
+            />
+            <Route path="settings" element={<Settings />} />
+          </Route>
 
-          {/* Customer detail — pass state and setter as props */}
-          <Route
-            path="customers/:id"
-            element={<CustomerDetail customers={customers} setCustomers={setCustomers} />}
-          />
-
-          {/* Settings page */}
-          <Route path="settings" element={<Settings />} />
-
-        </Route>
-      </Routes>
+        </Routes>
+      </AuthProvider>
     </BrowserRouter>
   );
 }
