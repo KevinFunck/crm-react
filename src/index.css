@@ -47,3 +47,12 @@ body {
 .fc .fc-event-title   { color: #070b15 !important; font-weight: 600; }
 .fc .fc-event-time    { color: #070b15 !important; }
 .fc .fc-event:hover   { background-color: #009e89 !important; }
+
+/* ── FullCalendar mobile responsive ── */
+@media (max-width: 640px) {
+  .fc .fc-toolbar          { flex-direction: column; gap: 8px; align-items: flex-start; }
+  .fc .fc-toolbar-title    { font-size: 0.85rem !important; }
+  .fc .fc-button           { padding: 3px 8px !important; font-size: 0.7rem !important; }
+  .fc .fc-col-header-cell-cushion { font-size: 0.65rem !important; }
+  .fc .fc-daygrid-day-number      { font-size: 0.7rem !important; }
+}
