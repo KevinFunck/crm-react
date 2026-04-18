@@ -25,6 +25,24 @@ export const getCustomers = async () => {
 };
 
 /* =========================
+   GET SINGLE CUSTOMER
+========================= */
+export const getCustomerById = async (id) => {
+  const { data, error } = await supabase
+    .from("customers")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (error) {
+    console.error("GET BY ID ERROR:", error);
+    throw error;
+  }
+
+  return data;
+};
+
+/* =========================
    CREATE CUSTOMER (FIXED + DEBUG)
 ========================= */
 export const createCustomer = async (customer) => {

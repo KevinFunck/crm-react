@@ -33,7 +33,15 @@ export default function Customers({ customers, setCustomers }: Props) {
   const fetchCustomers = async () => {
     try {
       const res = await axios.get(`${API}/customers`);
-      setCustomers(res.data);
+      const mapped: CustomerType[] = (res.data || []).map((c: any) => ({
+        id: String(c.id),
+        companyName: c.companyName || "",
+        companyEmail: c.companyEmail || "",
+        companyPhone: c.companyPhone || "",
+        contacts: [],
+        notes: [],
+      }));
+      setCustomers(mapped);
     } catch {
       setToast({ message: "Failed to load customers.", type: "error" });
     }

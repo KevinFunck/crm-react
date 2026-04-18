@@ -1,6 +1,7 @@
 import express from "express";
 import {
   getCustomers,
+  getCustomerById,
   createCustomer,
   updateCustomer,
   deleteCustomer
@@ -20,6 +21,18 @@ router.get("/", async (req, res) => {
       error: err.message,
       full: err
     });
+  }
+});
+
+/* ---------------------------
+   GET SINGLE CUSTOMER
+--------------------------- */
+router.get("/:id", async (req, res) => {
+  try {
+    const data = await getCustomerById(req.params.id);
+    res.json(data);
+  } catch (err) {
+    res.status(404).json({ error: err.message });
   }
 });
 

@@ -29,6 +29,30 @@ export default function CustomerDetail({ customers, setCustomers }: Props) {
   const [newContactNote, setNewContactNote] = useState("");
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
   const closeToast = useCallback(() => setToast(null), []);
+  const [notFound, setNotFound] = useState(false);
+
+  /* If customers array is empty (direct nav / reload), fetch this customer first */
+  useEffect(() => {
+    if (!id || customer) return;
+    const fetchCustomer = async () => {
+      try {
+        const res = await axios.get(`${API}/customers/${id}`);
+        const c = res.data;
+        const loaded: CustomerType = {
+          id: String(c.id),
+          companyName: c.companyName || c.company_name || "",
+          companyEmail: c.companyEmail || c.company_email || "",
+          companyPhone: c.companyPhone || c.company_phone || "",
+          contacts: [],
+          notes: [],
+        };
+        setCustomers(prev => [...prev, loaded]);
+      } catch {
+        setNotFound(true);
+      }
+    };
+    fetchCustomer();
+  }, [id, customer, setCustomers]);
 
   /* Load contacts and notes from backend on mount */
   useEffect(() => {
@@ -51,9 +75,15 @@ export default function CustomerDetail({ customers, setCustomers }: Props) {
     load();
   }, [id, setCustomers]);
 
-  if (!customer) return (
+  if (notFound) return (
     <div className="flex items-center justify-center h-48">
       <p className="text-cyber-muted text-sm">Company not found.</p>
+    </div>
+  );
+
+  if (!customer) return (
+    <div className="flex items-center justify-center h-48">
+      <p className="text-cyber-muted text-sm animate-pulse">Loading…</p>
     </div>
   );
 
