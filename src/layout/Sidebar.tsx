@@ -86,7 +86,7 @@ export default function Sidebar({ items, isOpen, onClose }: SidebarProps) {
 
         {/* Section label */}
         <div className="px-5 pt-5 pb-2">
-          <p className="text-[9px] font-semibold tracking-widest text-cyber-muted uppercase">App Drawer</p>
+          <p className="text-[9px] font-semibold tracking-widest text-cyber-muted uppercase">Navigation</p>
         </div>
 
         {/* Nav links */}
@@ -106,7 +106,7 @@ export default function Sidebar({ items, isOpen, onClose }: SidebarProps) {
               }
             >
               {iconMap[item.name] ?? null}
-              {item.name}
+              {item.label}
             </NavLink>
           ))}
         </nav>
