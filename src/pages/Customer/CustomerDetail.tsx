@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
 import { useParams, useNavigate } from "react-router-dom";
 import { CustomerType, ContactPerson, Note, CustomerStatus } from "../../types/Customer";
+import Toast from "../../components/Toast";
 
 const STATUS_OPTIONS: { value: CustomerStatus; label: string }[] = [
   { value: "lead",     label: "Lead" },
@@ -24,7 +25,6 @@ function StatusBadge({ status }: { status?: CustomerStatus }) {
     </span>
   );
 }
-import Toast from "../../components/Toast";
 
 const API = process.env.REACT_APP_API_URL || "http://localhost:5001";
 
