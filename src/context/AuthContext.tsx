@@ -24,7 +24,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (localStorage.getItem("guest") === "true") {
+    if (sessionStorage.getItem("guest") === "true") {
       setUser({ id: "guest", email: "Guest", isGuest: true });
       setLoading(false);
       return;
@@ -46,12 +46,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function login(email: string, password: string) {
     const res = await axios.post(`${API}/auth/login`, { email, password });
     localStorage.setItem("access_token", res.data.access_token);
-    localStorage.removeItem("guest");
+    sessionStorage.removeItem("guest");
     setUser(res.data.user);
   }
 
   function loginAsGuest() {
-    localStorage.setItem("guest", "true");
+    sessionStorage.setItem("guest", "true");
     localStorage.removeItem("access_token");
     setUser({ id: "guest", email: "Guest", isGuest: true });
   }
@@ -64,7 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .catch(() => {});
     }
     localStorage.removeItem("access_token");
-    localStorage.removeItem("guest");
+    sessionStorage.removeItem("guest");
     setUser(null);
   }
 
