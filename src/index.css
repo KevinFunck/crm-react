@@ -2,71 +2,48 @@
 @tailwind components;
 @tailwind utilities;
 
-/* === FullCalendar Dark Mode Styling === */
-
-/* Month & Year title (top center) */
-.fc .fc-toolbar-title {
-  color: white !important;
+/* ── Global dark background ── */
+body {
+  background-color: #070b15;
+  color: #c8d6ea;
 }
 
-/* Day numbers inside calendar grid */
-.fc .fc-daygrid-day-number {
-  color: white !important;
+/* ── Custom scrollbar ── */
+::-webkit-scrollbar             { width: 6px; height: 6px; }
+::-webkit-scrollbar-track       { background: #070b15; }
+::-webkit-scrollbar-thumb       { background: #1a2d4a; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #00d4b8; }
+
+/* ── Glow utilities ── */
+.glow-accent { filter: drop-shadow(0 0 6px rgba(0,212,184,0.7)); }
+.border-glow { box-shadow: 0 0 15px rgba(0,212,184,0.08), inset 0 0 15px rgba(0,212,184,0.02); }
+
+/* ── Subtle dot-grid background ── */
+.dot-grid {
+  background-image: radial-gradient(circle, #1a2d4a 1px, transparent 1px);
+  background-size: 24px 24px;
 }
 
-/* Time labels on the left (e.g., 08:00, 09:00) */
-.fc .fc-timegrid-slot-label-cushion {
-  color: white !important;
-}
+/* ═══════════════════════════════
+   FullCalendar — Cyber Dark Theme
+═══════════════════════════════ */
+.fc .fc-toolbar-title                { color: #c8d6ea !important; }
+.fc .fc-daygrid-day-number           { color: #c8d6ea !important; }
+.fc .fc-timegrid-slot-label-cushion  { color: #c8d6ea !important; }
+.fc .fc-col-header-cell-cushion      { color: #4a5e78 !important; font-weight: 600; }
 
-/* Weekday names (Mon, Tue, Wed...) → BLACK */
-.fc .fc-col-header-cell-cushion {
-  color: black !important;
-  font-weight: 600;
-}
-
-/* Toolbar buttons (Today, Next, Prev) */
 .fc .fc-button {
-  background-color: #1f2937 !important;
-  border: 1px solid #374151 !important;
-  color: white !important;
+  background-color: #0f1630 !important;
+  border: 1px solid #1a2d4a !important;
+  color: #c8d6ea !important;
 }
+.fc .fc-button:hover  { background-color: #1a2d4a !important; }
+.fc                   { background-color: #0c1124; }
 
-.fc .fc-button:hover {
-  background-color: #374151 !important;
-}
-
-/* Optional: Dark background for the calendar */
-.fc {
-  background-color: #111827;
-}
-
-/* Darker grid borders */
 .fc-theme-standard td,
-.fc-theme-standard th {
-  border-color: #374151;
-}
-/* === Improve Event Visibility in Dark Mode === */
+.fc-theme-standard th { border-color: #1a2d4a; }
 
-/* Event container */
-.fc .fc-event {
-  background-color: #2563eb !important; /* blue-600 */
-  border: none !important;
-  color: white !important;
-}
-
-/* Event title text */
-.fc .fc-event-title {
-  color: white !important;
-  font-weight: 500;
-}
-
-/* Time text inside events */
-.fc .fc-event-time {
-  color: white !important;
-}
-
-/* Hover effect */
-.fc .fc-event:hover {
-  background-color: #1d4ed8 !important; /* darker blue */
-}
+.fc .fc-event         { background-color: #00d4b8 !important; border: none !important; color: #070b15 !important; }
+.fc .fc-event-title   { color: #070b15 !important; font-weight: 600; }
+.fc .fc-event-time    { color: #070b15 !important; }
+.fc .fc-event:hover   { background-color: #009e89 !important; }

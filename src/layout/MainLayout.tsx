@@ -6,20 +6,9 @@ import { useAuth } from "../context/AuthContext";
 
 export default function MainLayout() {
   const { user, logout } = useAuth();
-
-  /* ---------------------------
-     Controls whether the mobile sidebar drawer is open
-  --------------------------- */
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  /* ---------------------------
-     Current route path — used to resolve the active page title
-  --------------------------- */
   const location = useLocation();
 
-  /* ---------------------------
-     Navigation items shown in the sidebar
-  --------------------------- */
   const navItems: NavItem[] = [
     { name: "Dashboard", path: "/" },
     { name: "Customers", path: "/customers" },
@@ -27,55 +16,65 @@ export default function MainLayout() {
     { name: "Settings", path: "/settings" },
   ];
 
-  /* ---------------------------
-     Resolve the current page title from the nav items list.
-     Falls back to "CRM" if no match is found.
-  --------------------------- */
-  const pageTitle =
-    navItems.find((i) => i.path === location.pathname)?.name || "CRM";
+  const pageTitle = navItems.find((i) => i.path === location.pathname)?.name ?? "CRM";
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-cyber-bg overflow-hidden">
 
-      {/* Sidebar navigation */}
-      <Sidebar
-        items={navItems}
-        isOpen={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-      />
+      <Sidebar items={navItems} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      {/* Main content area */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-w-0">
 
-        {/* Top header bar */}
-        <header className="flex items-center justify-between bg-gray-800 text-white shadow px-6 py-4">
+        {/* Top header */}
+        <header className="flex items-center justify-between bg-cyber-surface border-b border-cyber-border px-6 py-3 flex-shrink-0">
 
-          {/* Mobile hamburger button — hidden on desktop */}
-          <button
-            className="md:hidden text-2xl text-white hover:text-gray-300"
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-          >
-            ☰
-          </button>
+          {/* Left: hamburger + breadcrumb */}
+          <div className="flex items-center gap-4">
+            <button
+              className="md:hidden text-cyber-muted hover:text-cyber-text"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+              </svg>
+            </button>
+            <div>
+              <p className="text-[9px] text-cyber-muted tracking-widest uppercase">Admin Dashboard</p>
+              <h1 className="text-sm font-semibold text-cyber-text tracking-wide">{pageTitle}</h1>
+            </div>
+          </div>
 
-          {/* Dynamic page title */}
-          <h1 className="text-lg font-semibold">{pageTitle}</h1>
-
-          {/* User email + logout */}
+          {/* Right: user + logout */}
           <div className="flex items-center gap-3">
-            <span className="text-gray-300 text-sm hidden sm:block">{user?.email}</span>
+            {/* Online indicator */}
+            <div className="hidden sm:flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-cyber-accent shadow-glow-sm"/>
+              <span className="text-xs text-cyber-muted">Online</span>
+            </div>
+
+            {/* User badge */}
+            <div className="flex items-center gap-2 bg-cyber-card border border-cyber-border rounded px-3 py-1.5">
+              <div className="w-5 h-5 rounded-full bg-cyber-accent/20 border border-cyber-accent/40 flex items-center justify-center">
+                <span className="text-[9px] font-bold text-cyber-accent uppercase">
+                  {user?.email?.[0] ?? "G"}
+                </span>
+              </div>
+              <span className="text-xs text-cyber-text hidden sm:block max-w-32 truncate">{user?.email ?? "Guest"}</span>
+            </div>
+
+            {/* Logout */}
             <button
               onClick={logout}
-              className="text-sm text-gray-300 hover:text-white border border-gray-600 rounded px-3 py-1 hover:border-gray-400 transition-colors"
+              className="text-xs text-cyber-muted hover:text-cyber-accent border border-cyber-border hover:border-cyber-accent/50 rounded px-3 py-1.5 transition-colors"
             >
-              Abmelden
+              Sign Out
             </button>
           </div>
 
         </header>
 
-        {/* Routed page content */}
-        <main className="flex-1 p-6 overflow-auto bg-gray-100">
+        {/* Page content */}
+        <main className="flex-1 p-6 overflow-auto bg-cyber-bg dot-grid">
           <Outlet />
         </main>
 
