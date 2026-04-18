@@ -52,6 +52,7 @@ export const createCustomer = async (customer) => {
     companyName: customer.companyName,
     companyEmail: customer.companyEmail,
     companyPhone: customer.companyPhone,
+    status: customer.status ?? "lead",
   };
 
   console.log("📦 PAYLOAD TO SUPABASE:", payload);
@@ -80,6 +81,7 @@ export const updateCustomer = async (id, customer) => {
     companyName: customer.companyName,
     companyEmail: customer.companyEmail,
     companyPhone: customer.companyPhone,
+    status: customer.status,
   };
 
   const { data, error } = await supabase

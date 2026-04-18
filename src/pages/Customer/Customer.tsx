@@ -1,9 +1,30 @@
 import axios from "axios";
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
 import { useNavigate } from "react-router-dom";
-import { CustomerType } from "../../types/Customer";
+import { CustomerType, CustomerStatus } from "../../types/Customer";
 import React, { useState, useEffect, useCallback } from "react";
 import Toast from "../../components/Toast";
+
+const STATUS_OPTIONS: { value: CustomerStatus; label: string }[] = [
+  { value: "lead",     label: "Lead" },
+  { value: "customer", label: "Customer" },
+  { value: "inactive", label: "Inactive" },
+];
+
+function StatusBadge({ status }: { status?: CustomerStatus }) {
+  const map: Record<CustomerStatus, { label: string; cls: string }> = {
+    lead:     { label: "Lead",     cls: "bg-yellow-500/15 text-yellow-400 border-yellow-500/30" },
+    customer: { label: "Customer", cls: "bg-cyber-accent/15 text-cyber-accent border-cyber-accent/30" },
+    inactive: { label: "Inactive", cls: "bg-white/5 text-cyber-muted border-cyber-border" },
+  };
+  const s = status ?? "lead";
+  const { label, cls } = map[s];
+  return (
+    <span className={`text-[10px] font-semibold tracking-widest uppercase px-2 py-0.5 rounded border ${cls}`}>
+      {label}
+    </span>
+  );
+}
 
 const API = process.env.REACT_APP_API_URL || "http://localhost:5001";
 
@@ -20,7 +41,7 @@ export default function Customers({ customers, setCustomers }: Props) {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<CustomerType | null>(null);
-  const [formData, setFormData] = useState({ companyName: "", companyEmail: "", companyPhone: "" });
+  const [formData, setFormData] = useState({ companyName: "", companyEmail: "", companyPhone: "", status: "lead" as CustomerStatus });
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [customerToDelete, setCustomerToDelete] = useState<CustomerType | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -38,6 +59,7 @@ export default function Customers({ customers, setCustomers }: Props) {
         companyName: c.companyName || "",
         companyEmail: c.companyEmail || "",
         companyPhone: c.companyPhone || "",
+        status: c.status ?? "lead",
         contacts: [],
         notes: [],
       }));
@@ -65,13 +87,13 @@ export default function Customers({ customers, setCustomers }: Props) {
 
   const openAddModal = () => {
     setEditingCustomer(null);
-    setFormData({ companyName: "", companyEmail: "", companyPhone: "" });
+    setFormData({ companyName: "", companyEmail: "", companyPhone: "", status: "lead" });
     setIsModalOpen(true);
   };
 
   const openEditModal = (customer: CustomerType) => {
     setEditingCustomer(customer);
-    setFormData({ companyName: customer.companyName, companyEmail: customer.companyEmail || "", companyPhone: customer.companyPhone || "" });
+    setFormData({ companyName: customer.companyName, companyEmail: customer.companyEmail || "", companyPhone: customer.companyPhone || "", status: customer.status ?? "lead" });
     setIsModalOpen(true);
   };
 
@@ -100,11 +122,13 @@ export default function Customers({ customers, setCustomers }: Props) {
     try {
       if (editingCustomer) {
         const res = await axios.put(`${API}/customers/${editingCustomer.id}`, formData);
-        setCustomers(customers.map((c) => (c.id === editingCustomer.id ? res.data : c)));
+        const updated: CustomerType = { ...editingCustomer, ...formData, id: String(res.data.id ?? editingCustomer.id), contacts: editingCustomer.contacts, notes: editingCustomer.notes };
+        setCustomers(customers.map((c) => (c.id === editingCustomer.id ? updated : c)));
         setToast({ message: "Company updated.", type: "success" });
       } else {
         const res = await axios.post(`${API}/customers`, formData);
-        setCustomers([...customers, res.data]);
+        const created: CustomerType = { id: String(res.data.id), companyName: res.data.companyName || "", companyEmail: res.data.companyEmail || "", companyPhone: res.data.companyPhone || "", status: res.data.status ?? "lead", contacts: [], notes: [] };
+        setCustomers([...customers, created]);
         setToast({ message: "Company added.", type: "success" });
       }
       setIsModalOpen(false);
@@ -152,9 +176,9 @@ export default function Customers({ customers, setCustomers }: Props) {
           <thead>
             <tr className="border-b border-cyber-border">
               <th className="px-5 py-3 text-left text-[9px] font-semibold tracking-widest text-cyber-muted uppercase">Company</th>
-              <th className="px-5 py-3 text-left text-[9px] font-semibold tracking-widest text-cyber-muted uppercase hidden sm:table-cell">Email</th>
-              <th className="px-5 py-3 text-left text-[9px] font-semibold tracking-widest text-cyber-muted uppercase hidden md:table-cell">Phone</th>
-              <th className="px-5 py-3 text-left text-[9px] font-semibold tracking-widest text-cyber-muted uppercase hidden lg:table-cell">Contacts</th>
+              <th className="px-5 py-3 text-left text-[9px] font-semibold tracking-widest text-cyber-muted uppercase hidden sm:table-cell">Status</th>
+              <th className="px-5 py-3 text-left text-[9px] font-semibold tracking-widest text-cyber-muted uppercase hidden md:table-cell">Email</th>
+              <th className="px-5 py-3 text-left text-[9px] font-semibold tracking-widest text-cyber-muted uppercase hidden lg:table-cell">Phone</th>
               <th className="px-5 py-3 text-right text-[9px] font-semibold tracking-widest text-cyber-muted uppercase">Actions</th>
             </tr>
           </thead>
@@ -189,13 +213,9 @@ export default function Customers({ customers, setCustomers }: Props) {
                       onClick={() => navigate(`/customers/${customer.id}`)}
                     >
                       <td className="px-5 py-3 text-sm font-medium text-cyber-text">{customer.companyName}</td>
-                      <td className="px-5 py-3 text-sm text-cyber-muted hidden sm:table-cell">{customer.companyEmail}</td>
-                      <td className="px-5 py-3 text-sm text-cyber-muted hidden md:table-cell">{customer.companyPhone}</td>
-                      <td className="px-5 py-3 hidden lg:table-cell">
-                        <span className="text-xs bg-cyber-dim/60 text-cyber-muted px-2 py-0.5 rounded">
-                          {customer.contacts?.length ?? 0}
-                        </span>
-                      </td>
+                      <td className="px-5 py-3 hidden sm:table-cell"><StatusBadge status={customer.status} /></td>
+                      <td className="px-5 py-3 text-sm text-cyber-muted hidden md:table-cell">{customer.companyEmail}</td>
+                      <td className="px-5 py-3 text-sm text-cyber-muted hidden lg:table-cell">{customer.companyPhone}</td>
                       <td className="px-5 py-3 text-right space-x-3" onClick={e => e.stopPropagation()}>
                         <button onClick={() => openEditModal(customer)} className="text-xs text-cyber-blue hover:text-blue-400 transition-colors">Edit</button>
                         <button onClick={() => openDeleteModal(customer)} className="text-xs text-cyber-pink hover:text-red-400 transition-colors">Delete</button>
@@ -250,6 +270,12 @@ export default function Customers({ customers, setCustomers }: Props) {
               <div>
                 <label className="block text-[10px] tracking-widest text-cyber-muted uppercase mb-1.5">Phone</label>
                 <input type="tel" placeholder="+49 123 456 789" value={formData.companyPhone} onChange={e => setFormData({ ...formData, companyPhone: e.target.value })} className={inputCls} />
+              </div>
+              <div>
+                <label className="block text-[10px] tracking-widest text-cyber-muted uppercase mb-1.5">Status</label>
+                <select value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value as CustomerStatus })} className={inputCls}>
+                  {STATUS_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
               </div>
             </div>
             <div className="mt-5 flex justify-end gap-2">

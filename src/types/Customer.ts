@@ -6,7 +6,7 @@ export interface ContactPerson {
   name: string;
   email: string;
   phone?: string;
-  notes: Note[]; // Notes specific to this contact
+  notes: Note[];
 }
 
 /* ---------------------------
@@ -18,6 +18,8 @@ export interface Note {
   createdAt: string;
 }
 
+export type CustomerStatus = "lead" | "customer" | "inactive";
+
 /* ---------------------------
    Company (Customer)
 --------------------------- */
@@ -26,6 +28,7 @@ export interface CustomerType {
   companyName: string;
   companyEmail?: string;
   companyPhone?: string;
+  status?: CustomerStatus;
   contacts: ContactPerson[];
-  notes: Note[]; // Company-wide notes
+  notes: Note[];
 }

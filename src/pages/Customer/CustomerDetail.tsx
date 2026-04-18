@@ -2,7 +2,28 @@ import axios from "axios";
 import { useState, useEffect, useCallback } from "react";
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
 import { useParams, useNavigate } from "react-router-dom";
-import { CustomerType, ContactPerson, Note } from "../../types/Customer";
+import { CustomerType, ContactPerson, Note, CustomerStatus } from "../../types/Customer";
+
+const STATUS_OPTIONS: { value: CustomerStatus; label: string }[] = [
+  { value: "lead",     label: "Lead" },
+  { value: "customer", label: "Customer" },
+  { value: "inactive", label: "Inactive" },
+];
+
+function StatusBadge({ status }: { status?: CustomerStatus }) {
+  const map: Record<CustomerStatus, { label: string; cls: string }> = {
+    lead:     { label: "Lead",     cls: "bg-yellow-500/15 text-yellow-400 border-yellow-500/30" },
+    customer: { label: "Customer", cls: "bg-cyber-accent/15 text-cyber-accent border-cyber-accent/30" },
+    inactive: { label: "Inactive", cls: "bg-white/5 text-cyber-muted border-cyber-border" },
+  };
+  const s = status ?? "lead";
+  const { label, cls } = map[s];
+  return (
+    <span className={`text-[10px] font-semibold tracking-widest uppercase px-2 py-0.5 rounded border ${cls}`}>
+      {label}
+    </span>
+  );
+}
 import Toast from "../../components/Toast";
 
 const API = process.env.REACT_APP_API_URL || "http://localhost:5001";
@@ -164,7 +185,10 @@ export default function CustomerDetail({ customers, setCustomers }: Props) {
       <div className="flex items-center justify-between bg-cyber-card border border-cyber-border rounded-lg px-5 py-3">
         <div>
           <p className="text-[9px] tracking-widest text-cyber-muted uppercase">Companies / Detail</p>
-          <h1 className="text-base font-semibold text-cyber-text mt-0.5">{customer.companyName}</h1>
+          <div className="flex items-center gap-2.5 mt-0.5">
+            <h1 className="text-base font-semibold text-cyber-text">{customer.companyName}</h1>
+            <StatusBadge status={customer.status} />
+          </div>
         </div>
         <button onClick={() => navigate("/customers")} className="text-xs border border-cyber-border text-cyber-muted rounded px-3 py-1.5 hover:text-cyber-text transition-colors">
           ← Back
@@ -174,7 +198,7 @@ export default function CustomerDetail({ customers, setCustomers }: Props) {
       {/* Company info */}
       <div className="bg-cyber-card border border-cyber-border rounded-lg p-5">
         <p className="text-[10px] font-semibold tracking-widest text-cyber-muted uppercase mb-3">Company Information</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
           <div>
             <p className="text-[9px] tracking-widest text-cyber-muted uppercase mb-1">Email</p>
             <p className="text-cyber-text">{customer.companyEmail || "—"}</p>
@@ -182,6 +206,20 @@ export default function CustomerDetail({ customers, setCustomers }: Props) {
           <div>
             <p className="text-[9px] tracking-widest text-cyber-muted uppercase mb-1">Phone</p>
             <p className="text-cyber-text">{customer.companyPhone || "—"}</p>
+          </div>
+          <div>
+            <p className="text-[9px] tracking-widest text-cyber-muted uppercase mb-1">Status</p>
+            <select
+              value={customer.status ?? "lead"}
+              onChange={async (e) => {
+                const newStatus = e.target.value as CustomerStatus;
+                setCustomers(prev => prev.map(c => c.id === customer.id ? { ...c, status: newStatus } : c));
+                try { await axios.put(`${API}/customers/${customer.id}`, { ...customer, status: newStatus }); } catch { /* silent */ }
+              }}
+              className="bg-cyber-surface border border-cyber-border rounded px-2 py-1.5 text-xs text-cyber-text focus:outline-none focus:border-cyber-accent/60 transition-colors"
+            >
+              {STATUS_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+            </select>
           </div>
         </div>
       </div>
