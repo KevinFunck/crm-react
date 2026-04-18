@@ -6,12 +6,14 @@ const API = process.env.REACT_APP_API_URL || "http://localhost:5001";
 interface User {
   id: string;
   email: string;
+  isGuest?: boolean;
 }
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
+  loginAsGuest: () => void;
   logout: () => Promise<void>;
 }
 
@@ -22,6 +24,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (localStorage.getItem("guest") === "true") {
+      setUser({ id: "guest", email: "Guest", isGuest: true });
+      setLoading(false);
+      return;
+    }
+
     const token = localStorage.getItem("access_token");
     if (!token) {
       setLoading(false);
@@ -38,7 +46,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function login(email: string, password: string) {
     const res = await axios.post(`${API}/auth/login`, { email, password });
     localStorage.setItem("access_token", res.data.access_token);
+    localStorage.removeItem("guest");
     setUser(res.data.user);
+  }
+
+  function loginAsGuest() {
+    localStorage.setItem("guest", "true");
+    localStorage.removeItem("access_token");
+    setUser({ id: "guest", email: "Guest", isGuest: true });
   }
 
   async function logout() {
@@ -49,11 +64,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .catch(() => {});
     }
     localStorage.removeItem("access_token");
+    localStorage.removeItem("guest");
     setUser(null);
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, loginAsGuest, logout }}>
       {children}
     </AuthContext.Provider>
   );
