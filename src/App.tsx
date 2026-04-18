@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import MainLayout from "./layout/MainLayout";
+import SplashScreen from "./pages/SplashScreen";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Calendar from "./pages/Calendar";
@@ -14,39 +15,53 @@ import { CustomerType } from "./types/Customer";
 function App() {
   const [customers, setCustomers] = useState<CustomerType[]>([]);
 
+  /* Show splash only once per session */
+  const [showSplash, setShowSplash] = useState(
+    () => !sessionStorage.getItem("splashShown")
+  );
+
+  function handleSplashDone() {
+    sessionStorage.setItem("splashShown", "true");
+    setShowSplash(false);
+  }
+
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <Routes>
+    <>
+      {showSplash && <SplashScreen onDone={handleSplashDone} />}
 
-          {/* Public login route */}
-          <Route path="/login" element={<Login />} />
+      <BrowserRouter>
+        <AuthProvider>
+          <Routes>
 
-          {/* Protected app routes */}
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <MainLayout />
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<Dashboard />} />
-            <Route path="calendar" element={<Calendar />} />
+            {/* Public login route */}
+            <Route path="/login" element={<Login />} />
+
+            {/* Protected app routes */}
             <Route
-              path="customers"
-              element={<Customer customers={customers} setCustomers={setCustomers} />}
-            />
-            <Route
-              path="customers/:id"
-              element={<CustomerDetail customers={customers} setCustomers={setCustomers} />}
-            />
-            <Route path="settings" element={<Settings />} />
-          </Route>
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <MainLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<Dashboard />} />
+              <Route path="calendar" element={<Calendar />} />
+              <Route
+                path="customers"
+                element={<Customer customers={customers} setCustomers={setCustomers} />}
+              />
+              <Route
+                path="customers/:id"
+                element={<CustomerDetail customers={customers} setCustomers={setCustomers} />}
+              />
+              <Route path="settings" element={<Settings />} />
+            </Route>
 
-        </Routes>
-      </AuthProvider>
-    </BrowserRouter>
+          </Routes>
+        </AuthProvider>
+      </BrowserRouter>
+    </>
   );
 }
 

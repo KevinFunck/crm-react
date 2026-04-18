@@ -2,6 +2,71 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ═══════════════════════════════
+   Splash Screen Animations
+═══════════════════════════════ */
+
+@keyframes splashFadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes splashScaleIn {
+  from { opacity: 0; transform: scale(0.7); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes splashBarGrow {
+  from { width: 0%; }
+  to   { width: 100%; }
+}
+
+@keyframes splashScan {
+  0%   { top: -2px; opacity: 0; }
+  5%   { opacity: 1; }
+  95%  { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+@keyframes splashRingRotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.splash-logo-enter {
+  animation: splashScaleIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.splash-text-enter {
+  opacity: 0;
+  animation: splashFadeUp 0.5s ease forwards;
+}
+
+.splash-bar-enter {
+  opacity: 0;
+  animation: splashFadeUp 0.4s ease forwards;
+}
+
+.splash-corner-enter {
+  opacity: 0;
+  animation: splashFadeUp 0.6s ease 0.1s forwards;
+}
+
+.splash-progress {
+  animation: splashBarGrow 2s cubic-bezier(0.4, 0, 0.2, 1) 0.9s forwards;
+  width: 0%;
+}
+
+.splash-scan {
+  animation: splashScan 3s linear infinite;
+  position: absolute;
+}
+
+.splash-ring-outer {
+  animation: splashRingRotate 8s linear infinite;
+  border-style: dashed;
+}
+
 /* ── Global dark background ── */
 body {
   background-color: #070b15;
