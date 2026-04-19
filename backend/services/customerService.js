@@ -49,10 +49,17 @@ export const createCustomer = async (customer) => {
 
 
   const payload = {
-    companyName: customer.companyName,
-    companyEmail: customer.companyEmail,
-    companyPhone: customer.companyPhone,
-    status: customer.status ?? "lead",
+    companyName:   customer.companyName,
+    companyEmail:  customer.companyEmail,
+    companyPhone:  customer.companyPhone,
+    status:        customer.status ?? "lead",
+    industry:      customer.industry      ?? null,
+    revenue:       customer.revenue       ?? null,
+    website:       customer.website       ?? null,
+    addressStreet: customer.addressStreet ?? null,
+    addressCity:   customer.addressCity   ?? null,
+    addressCountry:customer.addressCountry?? null,
+    tags:          customer.tags          ?? [],
   };
 
   console.log("📦 PAYLOAD TO SUPABASE:", payload);
@@ -78,11 +85,18 @@ export const createCustomer = async (customer) => {
 ========================= */
 export const updateCustomer = async (id, customer) => {
   const payload = {
-    companyName: customer.companyName,
+    companyName:  customer.companyName,
     companyEmail: customer.companyEmail,
     companyPhone: customer.companyPhone,
-    status: customer.status,
+    status:       customer.status,
   };
+  if (customer.industry      !== undefined) payload.industry       = customer.industry      || null;
+  if (customer.revenue       !== undefined) payload.revenue        = customer.revenue       || null;
+  if (customer.website       !== undefined) payload.website        = customer.website       || null;
+  if (customer.addressStreet !== undefined) payload.addressStreet  = customer.addressStreet || null;
+  if (customer.addressCity   !== undefined) payload.addressCity    = customer.addressCity   || null;
+  if (customer.addressCountry!== undefined) payload.addressCountry = customer.addressCountry|| null;
+  if (customer.tags          !== undefined) payload.tags           = customer.tags;
 
   const { data, error } = await supabase
     .from("customers")

@@ -1,7 +1,7 @@
 import axios from "axios";
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
 import { useNavigate } from "react-router-dom";
-import { CustomerType, CustomerStatus } from "../../types/Customer";
+import { CustomerType, CustomerStatus, INDUSTRIES, PRESET_TAGS, TAG_COLORS } from "../../types/Customer";
 import React, { useState, useEffect, useCallback } from "react";
 import Toast from "../../components/Toast";
 
@@ -41,7 +41,14 @@ export default function Customers({ customers, setCustomers }: Props) {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<CustomerType | null>(null);
-  const [formData, setFormData] = useState({ companyName: "", companyEmail: "", companyPhone: "", status: "lead" as CustomerStatus });
+  const emptyForm = {
+    companyName: "", companyEmail: "", companyPhone: "",
+    status: "lead" as CustomerStatus,
+    industry: "", revenue: "", website: "",
+    addressStreet: "", addressCity: "", addressCountry: "",
+    tags: [] as string[],
+  };
+  const [formData, setFormData] = useState(emptyForm);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [customerToDelete, setCustomerToDelete] = useState<CustomerType | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -60,6 +67,13 @@ export default function Customers({ customers, setCustomers }: Props) {
         companyEmail: c.companyEmail || "",
         companyPhone: c.companyPhone || "",
         status: c.status ?? "lead",
+        industry: c.industry || "",
+        revenue: c.revenue || "",
+        website: c.website || "",
+        addressStreet: c.addressStreet || "",
+        addressCity: c.addressCity || "",
+        addressCountry: c.addressCountry || "",
+        tags: c.tags ?? [],
         contacts: [],
         notes: [],
       }));
@@ -87,13 +101,25 @@ export default function Customers({ customers, setCustomers }: Props) {
 
   const openAddModal = () => {
     setEditingCustomer(null);
-    setFormData({ companyName: "", companyEmail: "", companyPhone: "", status: "lead" });
+    setFormData(emptyForm);
     setIsModalOpen(true);
   };
 
   const openEditModal = (customer: CustomerType) => {
     setEditingCustomer(customer);
-    setFormData({ companyName: customer.companyName, companyEmail: customer.companyEmail || "", companyPhone: customer.companyPhone || "", status: customer.status ?? "lead" });
+    setFormData({
+      companyName: customer.companyName,
+      companyEmail: customer.companyEmail || "",
+      companyPhone: customer.companyPhone || "",
+      status: customer.status ?? "lead",
+      industry: customer.industry || "",
+      revenue: customer.revenue || "",
+      website: customer.website || "",
+      addressStreet: customer.addressStreet || "",
+      addressCity: customer.addressCity || "",
+      addressCountry: customer.addressCountry || "",
+      tags: customer.tags ?? [],
+    });
     setIsModalOpen(true);
   };
 
@@ -127,7 +153,8 @@ export default function Customers({ customers, setCustomers }: Props) {
         setToast({ message: "Company updated.", type: "success" });
       } else {
         const res = await axios.post(`${API}/customers`, formData);
-        const created: CustomerType = { id: String(res.data.id), companyName: res.data.companyName || "", companyEmail: res.data.companyEmail || "", companyPhone: res.data.companyPhone || "", status: res.data.status ?? "lead", contacts: [], notes: [] };
+        const d = res.data;
+        const created: CustomerType = { id: String(d.id), companyName: d.companyName || "", companyEmail: d.companyEmail || "", companyPhone: d.companyPhone || "", status: d.status ?? "lead", industry: d.industry || "", revenue: d.revenue || "", website: d.website || "", addressStreet: d.addressStreet || "", addressCity: d.addressCity || "", addressCountry: d.addressCountry || "", tags: d.tags ?? [], contacts: [], notes: [] };
         setCustomers([...customers, created]);
         setToast({ message: "Company added.", type: "success" });
       }
@@ -177,8 +204,8 @@ export default function Customers({ customers, setCustomers }: Props) {
             <tr className="border-b border-cyber-border">
               <th className="px-5 py-3 text-left text-[9px] font-semibold tracking-widest text-cyber-muted uppercase">Company</th>
               <th className="px-5 py-3 text-left text-[9px] font-semibold tracking-widest text-cyber-muted uppercase hidden sm:table-cell">Status</th>
-              <th className="px-5 py-3 text-left text-[9px] font-semibold tracking-widest text-cyber-muted uppercase hidden md:table-cell">Email</th>
-              <th className="px-5 py-3 text-left text-[9px] font-semibold tracking-widest text-cyber-muted uppercase hidden lg:table-cell">Phone</th>
+              <th className="px-5 py-3 text-left text-[9px] font-semibold tracking-widest text-cyber-muted uppercase hidden md:table-cell">Industry</th>
+              <th className="px-5 py-3 text-left text-[9px] font-semibold tracking-widest text-cyber-muted uppercase hidden lg:table-cell">Tags</th>
               <th className="px-5 py-3 text-right text-[9px] font-semibold tracking-widest text-cyber-muted uppercase">Actions</th>
             </tr>
           </thead>
@@ -214,8 +241,15 @@ export default function Customers({ customers, setCustomers }: Props) {
                     >
                       <td className="px-5 py-3 text-sm font-medium text-cyber-text">{customer.companyName}</td>
                       <td className="px-5 py-3 hidden sm:table-cell"><StatusBadge status={customer.status} /></td>
-                      <td className="px-5 py-3 text-sm text-cyber-muted hidden md:table-cell">{customer.companyEmail}</td>
-                      <td className="px-5 py-3 text-sm text-cyber-muted hidden lg:table-cell">{customer.companyPhone}</td>
+                      <td className="px-5 py-3 text-xs text-cyber-muted hidden md:table-cell">{customer.industry || "—"}</td>
+                      <td className="px-5 py-3 hidden lg:table-cell">
+                        <div className="flex flex-wrap gap-1">
+                          {(customer.tags ?? []).length === 0 && <span className="text-xs text-cyber-muted">—</span>}
+                          {(customer.tags ?? []).map(tag => (
+                            <span key={tag} className={`text-[10px] font-semibold px-2 py-0.5 rounded border ${TAG_COLORS[tag] ?? "bg-white/5 text-cyber-muted border-cyber-border"}`}>{tag}</span>
+                          ))}
+                        </div>
+                      </td>
                       <td className="px-5 py-3 text-right space-x-3" onClick={e => e.stopPropagation()}>
                         <button onClick={() => openEditModal(customer)} className="text-xs text-cyber-blue hover:text-blue-400 transition-colors">Edit</button>
                         <button onClick={() => openDeleteModal(customer)} className="text-xs text-cyber-pink hover:text-red-400 transition-colors">Delete</button>
@@ -258,24 +292,77 @@ export default function Customers({ customers, setCustomers }: Props) {
             <DialogTitle className="text-sm font-semibold text-cyber-text tracking-wide mb-4">
               {editingCustomer ? "Edit Company" : "Add Company"}
             </DialogTitle>
-            <div className="space-y-3">
-              <div>
-                <label className="block text-[10px] tracking-widest text-cyber-muted uppercase mb-1.5">Company Name *</label>
-                <input placeholder="Acme Corp" value={formData.companyName} onChange={e => setFormData({ ...formData, companyName: e.target.value })} className={inputCls} />
+            <div className="space-y-3 max-h-[65vh] overflow-y-auto pr-1">
+              {/* Basic */}
+              <p className="text-[9px] tracking-widest text-cyber-muted uppercase pt-1">Basic Info</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="sm:col-span-2">
+                  <label className="block text-[10px] tracking-widest text-cyber-muted uppercase mb-1.5">Company Name *</label>
+                  <input placeholder="Acme Corp" value={formData.companyName} onChange={e => setFormData({ ...formData, companyName: e.target.value })} className={inputCls} />
+                </div>
+                <div>
+                  <label className="block text-[10px] tracking-widest text-cyber-muted uppercase mb-1.5">Email</label>
+                  <input type="email" placeholder="info@acme.com" value={formData.companyEmail} onChange={e => setFormData({ ...formData, companyEmail: e.target.value })} className={inputCls} />
+                </div>
+                <div>
+                  <label className="block text-[10px] tracking-widest text-cyber-muted uppercase mb-1.5">Phone</label>
+                  <input type="tel" placeholder="+49 123 456 789" value={formData.companyPhone} onChange={e => setFormData({ ...formData, companyPhone: e.target.value })} className={inputCls} />
+                </div>
+                <div>
+                  <label className="block text-[10px] tracking-widest text-cyber-muted uppercase mb-1.5">Status</label>
+                  <select value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value as CustomerStatus })} className={inputCls}>
+                    {STATUS_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] tracking-widest text-cyber-muted uppercase mb-1.5">Industry</label>
+                  <select value={formData.industry} onChange={e => setFormData({ ...formData, industry: e.target.value })} className={inputCls}>
+                    <option value="">— Select —</option>
+                    {INDUSTRIES.map(i => <option key={i} value={i}>{i}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] tracking-widest text-cyber-muted uppercase mb-1.5">Revenue / Size</label>
+                  <input placeholder="e.g. €500k, 50 employees" value={formData.revenue} onChange={e => setFormData({ ...formData, revenue: e.target.value })} className={inputCls} />
+                </div>
+                <div>
+                  <label className="block text-[10px] tracking-widest text-cyber-muted uppercase mb-1.5">Website</label>
+                  <input placeholder="https://acme.com" value={formData.website} onChange={e => setFormData({ ...formData, website: e.target.value })} className={inputCls} />
+                </div>
               </div>
-              <div>
-                <label className="block text-[10px] tracking-widest text-cyber-muted uppercase mb-1.5">Email</label>
-                <input type="email" placeholder="info@acme.com" value={formData.companyEmail} onChange={e => setFormData({ ...formData, companyEmail: e.target.value })} className={inputCls} />
+
+              {/* Address */}
+              <p className="text-[9px] tracking-widest text-cyber-muted uppercase pt-2">Address</p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="sm:col-span-3">
+                  <label className="block text-[10px] tracking-widest text-cyber-muted uppercase mb-1.5">Street</label>
+                  <input placeholder="Musterstraße 1" value={formData.addressStreet} onChange={e => setFormData({ ...formData, addressStreet: e.target.value })} className={inputCls} />
+                </div>
+                <div>
+                  <label className="block text-[10px] tracking-widest text-cyber-muted uppercase mb-1.5">City</label>
+                  <input placeholder="Berlin" value={formData.addressCity} onChange={e => setFormData({ ...formData, addressCity: e.target.value })} className={inputCls} />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block text-[10px] tracking-widest text-cyber-muted uppercase mb-1.5">Country</label>
+                  <input placeholder="Germany" value={formData.addressCountry} onChange={e => setFormData({ ...formData, addressCountry: e.target.value })} className={inputCls} />
+                </div>
               </div>
-              <div>
-                <label className="block text-[10px] tracking-widest text-cyber-muted uppercase mb-1.5">Phone</label>
-                <input type="tel" placeholder="+49 123 456 789" value={formData.companyPhone} onChange={e => setFormData({ ...formData, companyPhone: e.target.value })} className={inputCls} />
-              </div>
-              <div>
-                <label className="block text-[10px] tracking-widest text-cyber-muted uppercase mb-1.5">Status</label>
-                <select value={formData.status} onChange={e => setFormData({ ...formData, status: e.target.value as CustomerStatus })} className={inputCls}>
-                  {STATUS_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                </select>
+
+              {/* Tags */}
+              <p className="text-[9px] tracking-widest text-cyber-muted uppercase pt-2">Tags</p>
+              <div className="flex flex-wrap gap-2">
+                {PRESET_TAGS.map(tag => {
+                  const active = formData.tags.includes(tag);
+                  return (
+                    <button
+                      key={tag} type="button"
+                      onClick={() => setFormData({ ...formData, tags: active ? formData.tags.filter(t => t !== tag) : [...formData.tags, tag] })}
+                      className={`text-[10px] font-semibold px-2.5 py-1 rounded border transition-all ${active ? (TAG_COLORS[tag] ?? "bg-white/5 text-cyber-muted border-cyber-border") : "border-cyber-border text-cyber-muted hover:border-cyber-accent/30"}`}
+                    >
+                      {tag}
+                    </button>
+                  );
+                })}
               </div>
             </div>
             <div className="mt-5 flex justify-end gap-2">

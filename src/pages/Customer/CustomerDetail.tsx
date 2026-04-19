@@ -2,7 +2,7 @@ import axios from "axios";
 import { useState, useEffect, useCallback } from "react";
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
 import { useParams, useNavigate } from "react-router-dom";
-import { CustomerType, ContactPerson, Note, CustomerStatus } from "../../types/Customer";
+import { CustomerType, ContactPerson, Note, CustomerStatus, PRESET_TAGS, TAG_COLORS } from "../../types/Customer";
 import Toast from "../../components/Toast";
 
 const STATUS_OPTIONS: { value: CustomerStatus; label: string }[] = [
@@ -61,9 +61,17 @@ export default function CustomerDetail({ customers, setCustomers }: Props) {
         const c = res.data;
         const loaded: CustomerType = {
           id: String(c.id),
-          companyName: c.companyName || c.company_name || "",
-          companyEmail: c.companyEmail || c.company_email || "",
-          companyPhone: c.companyPhone || c.company_phone || "",
+          companyName: c.companyName || "",
+          companyEmail: c.companyEmail || "",
+          companyPhone: c.companyPhone || "",
+          status: c.status ?? "lead",
+          industry: c.industry || "",
+          revenue: c.revenue || "",
+          website: c.website || "",
+          addressStreet: c.addressStreet || "",
+          addressCity: c.addressCity || "",
+          addressCountry: c.addressCountry || "",
+          tags: c.tags ?? [],
           contacts: [],
           notes: [],
         };
@@ -196,9 +204,9 @@ export default function CustomerDetail({ customers, setCustomers }: Props) {
       </div>
 
       {/* Company info */}
-      <div className="bg-cyber-card border border-cyber-border rounded-lg p-5">
-        <p className="text-[10px] font-semibold tracking-widest text-cyber-muted uppercase mb-3">Company Information</p>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+      <div className="bg-cyber-card border border-cyber-border rounded-lg p-5 space-y-4">
+        <p className="text-[10px] font-semibold tracking-widest text-cyber-muted uppercase">Company Information</p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-5 gap-y-3 text-sm">
           <div>
             <p className="text-[9px] tracking-widest text-cyber-muted uppercase mb-1">Email</p>
             <p className="text-cyber-text">{customer.companyEmail || "—"}</p>
@@ -206,6 +214,26 @@ export default function CustomerDetail({ customers, setCustomers }: Props) {
           <div>
             <p className="text-[9px] tracking-widest text-cyber-muted uppercase mb-1">Phone</p>
             <p className="text-cyber-text">{customer.companyPhone || "—"}</p>
+          </div>
+          <div>
+            <p className="text-[9px] tracking-widest text-cyber-muted uppercase mb-1">Website</p>
+            {customer.website
+              ? <a href={customer.website} target="_blank" rel="noreferrer" className="text-cyber-accent hover:underline truncate block">{customer.website}</a>
+              : <p className="text-cyber-text">—</p>}
+          </div>
+          <div>
+            <p className="text-[9px] tracking-widest text-cyber-muted uppercase mb-1">Industry</p>
+            <p className="text-cyber-text">{customer.industry || "—"}</p>
+          </div>
+          <div>
+            <p className="text-[9px] tracking-widest text-cyber-muted uppercase mb-1">Revenue / Size</p>
+            <p className="text-cyber-text">{customer.revenue || "—"}</p>
+          </div>
+          <div>
+            <p className="text-[9px] tracking-widest text-cyber-muted uppercase mb-1">Address</p>
+            <p className="text-cyber-text">
+              {[customer.addressStreet, customer.addressCity, customer.addressCountry].filter(Boolean).join(", ") || "—"}
+            </p>
           </div>
           <div>
             <p className="text-[9px] tracking-widest text-cyber-muted uppercase mb-1">Status</p>
@@ -220,6 +248,31 @@ export default function CustomerDetail({ customers, setCustomers }: Props) {
             >
               {STATUS_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
             </select>
+          </div>
+        </div>
+
+        {/* Tags */}
+        <div>
+          <p className="text-[9px] tracking-widest text-cyber-muted uppercase mb-2">Tags</p>
+          <div className="flex flex-wrap gap-2">
+            {PRESET_TAGS.map(tag => {
+              const active = (customer.tags ?? []).includes(tag);
+              return (
+                <button
+                  key={tag} type="button"
+                  onClick={async () => {
+                    const newTags = active
+                      ? (customer.tags ?? []).filter(t => t !== tag)
+                      : [...(customer.tags ?? []), tag];
+                    setCustomers(prev => prev.map(c => c.id === customer.id ? { ...c, tags: newTags } : c));
+                    try { await axios.put(`${API}/customers/${customer.id}`, { ...customer, tags: newTags }); } catch { /* silent */ }
+                  }}
+                  className={`text-[10px] font-semibold px-2.5 py-1 rounded border transition-all ${active ? (TAG_COLORS[tag] ?? "bg-white/5 text-cyber-muted border-cyber-border") : "border-cyber-border text-cyber-muted hover:border-cyber-accent/30 hover:text-cyber-text"}`}
+                >
+                  {tag}
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
