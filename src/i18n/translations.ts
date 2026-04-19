@@ -4,6 +4,7 @@ export interface Translations {
   nav: {
     dashboard: string;
     customers: string;
+    contacts: string;
     calendar: string;
     settings: string;
     appDrawer: string;
@@ -73,6 +74,7 @@ const t: Record<LangCode, Translations> = {
     nav: {
       dashboard: "Dashboard",
       customers: "Customers",
+      contacts: "Contacts",
       calendar: "Calendar",
       settings: "Settings",
       appDrawer: "Navigation",
@@ -114,6 +116,7 @@ const t: Record<LangCode, Translations> = {
     nav: {
       dashboard: "Dashboard",
       customers: "Kunden",
+      contacts: "Kontakte",
       calendar: "Kalender",
       settings: "Einstellungen",
       appDrawer: "Navigation",

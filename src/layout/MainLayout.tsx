@@ -13,9 +13,10 @@ export default function MainLayout() {
 
   const navItems: NavItem[] = [
     { name: "Dashboard", label: tr.nav.dashboard, path: "/" },
-    { name: "Customers",  label: tr.nav.customers,  path: "/customers" },
-    { name: "Calendar",   label: tr.nav.calendar,   path: "/calendar" },
-    { name: "Settings",   label: tr.nav.settings,   path: "/settings" },
+    { name: "Customers", label: tr.nav.customers, path: "/customers" },
+    { name: "Contacts",  label: tr.nav.contacts,  path: "/contacts" },
+    { name: "Calendar",  label: tr.nav.calendar,  path: "/calendar" },
+    { name: "Settings",  label: tr.nav.settings,  path: "/settings" },
   ];
 
   const pageTitle = navItems.find((i) => i.path === location.pathname)?.label ?? "CRM";

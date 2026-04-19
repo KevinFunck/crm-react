@@ -129,6 +129,7 @@ function DonutChart() {
 export default function Dashboard() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [customerCount, setCustomerCount] = useState<number | null>(null);
+  const [contactCount, setContactCount] = useState<number | null>(null);
 
   /* Live clock */
   useEffect(() => {
@@ -136,11 +137,10 @@ export default function Dashboard() {
     return () => clearInterval(t);
   }, []);
 
-  /* Fetch customer count */
+  /* Fetch counts */
   useEffect(() => {
-    axios.get(`${API}/customers`)
-      .then(res => setCustomerCount(res.data.length))
-      .catch(() => {});
+    axios.get(`${API}/customers`).then(res => setCustomerCount(res.data.length)).catch(() => {});
+    axios.get(`${API}/contacts`).then(res => setContactCount(res.data.length)).catch(() => {});
   }, []);
 
   const date = currentTime.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" });
@@ -193,7 +193,7 @@ export default function Dashboard() {
         />
         <StatCard
           label="Active Contacts"
-          value="—"
+          value={contactCount !== null ? contactCount : "—"}
           icon={
             <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>

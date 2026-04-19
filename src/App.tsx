@@ -10,6 +10,8 @@ import Dashboard from "./pages/Dashboard";
 import Calendar from "./pages/Calendar";
 import Customer from "./pages/Customer/Customer";
 import CustomerDetail from "./pages/Customer/CustomerDetail";
+import ContactsList from "./pages/Contacts/ContactsList";
+import ContactDetail from "./pages/Contacts/ContactDetail";
 import Settings from "./pages/Settings";
 import { CustomerType } from "./types/Customer";
 
@@ -44,6 +46,8 @@ function App() {
               <Route path="calendar" element={<Calendar />} />
               <Route path="customers" element={<Customer customers={customers} setCustomers={setCustomers} />} />
               <Route path="customers/:id" element={<CustomerDetail customers={customers} setCustomers={setCustomers} />} />
+              <Route path="contacts" element={<ContactsList />} />
+              <Route path="contacts/:id" element={<ContactDetail />} />
               <Route path="settings" element={<Settings />} />
             </Route>
           </Routes>

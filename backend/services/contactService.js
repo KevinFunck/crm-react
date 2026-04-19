@@ -18,13 +18,40 @@ const supabase = createClient(
 );
 
 /* =========================
-   GET ALL CONTACTS FOR A CUSTOMER
+   GET ALL CONTACTS (with company name)
+========================= */
+export const getAllContacts = async () => {
+  const { data, error } = await supabase
+    .from("contacts")
+    .select("*, customers(id, companyName)")
+    .order("name");
+
+  if (error) throw error;
+  return data;
+};
+
+/* =========================
+   GET CONTACTS FOR A CUSTOMER
 ========================= */
 export const getContacts = async (customerId) => {
   const { data, error } = await supabase
     .from("contacts")
-    .select("*")
+    .select("*, customers(id, companyName)")
     .eq("customer_id", customerId);
+
+  if (error) throw error;
+  return data;
+};
+
+/* =========================
+   GET SINGLE CONTACT
+========================= */
+export const getContactById = async (id) => {
+  const { data, error } = await supabase
+    .from("contacts")
+    .select("*, customers(id, companyName)")
+    .eq("id", id)
+    .single();
 
   if (error) throw error;
   return data;

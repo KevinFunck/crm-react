@@ -1,6 +1,8 @@
 import express from "express";
 import {
+  getAllContacts,
   getContacts,
+  getContactById,
   createContact,
   updateContact,
   deleteContact,
@@ -9,21 +11,27 @@ import {
 const router = express.Router();
 
 /* ---------------------------
-   GET ALL CONTACTS FOR A CUSTOMER
-   Query param: customer_id (required)
+   GET ALL CONTACTS or filter by customer_id
 --------------------------- */
 router.get("/", async (req, res) => {
   try {
     const { customer_id } = req.query;
-
-    if (!customer_id) {
-      return res.status(400).json({ error: "customer_id query param is required" });
-    }
-
-    const data = await getContacts(customer_id);
+    const data = customer_id ? await getContacts(customer_id) : await getAllContacts();
     res.json(data);
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+/* ---------------------------
+   GET SINGLE CONTACT
+--------------------------- */
+router.get("/:id", async (req, res) => {
+  try {
+    const data = await getContactById(req.params.id);
+    res.json(data);
+  } catch (err) {
+    res.status(404).json({ error: err.message });
   }
 });
 
